@@ -1,11 +1,12 @@
 from search_engine import SearchEngine
 
+
 class WordExtractor:
 
     QUERY = "*"
     TARGET_FIELD_NAME = "*"
     RETURN_LIMIT = 10000000
-    CHARS_TO_IGNORE = [",", ".", "/", "?", ";", ":", "(", ")", "+", "*", "[", "]", "{", "}", "&", "$", "@", "#", "%"]
+    CHARS_TO_IGNORE = [",", ".", "/", "?", ";", ":", "(", ")", "+", "*", "[", "]", "{", "}", "&", "$", "@", "#", "%", "\"", "|"]
     HYPHEN = "-"
 
     def __init__(self, collection_url, return_field_name):
@@ -18,7 +19,7 @@ class WordExtractor:
 
     def extract_words(self):
         response = SearchEngine.query(self.url)
-        word_set = set()
+        word_dict = {}
         for document in response[SearchEngine.DOCUMENTS_KEY]:
             s = document[self.return_field_name]
             words = s.split()
@@ -27,5 +28,7 @@ class WordExtractor:
                 for c in WordExtractor.CHARS_TO_IGNORE:
                     words[i] = words[i].strip(c)
                 words[i] = words[i].lower()
-            word_set = word_set.union(set(words))
-        return word_set
+                if (len(words[i]) > 1):
+                    word_dict[words[i]] = word_dict.get(words[i], 0) - 1
+        sorted_list = sorted(word_dict.keys(), key=word_dict.get)
+        return sorted_list
