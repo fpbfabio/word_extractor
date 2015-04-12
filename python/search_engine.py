@@ -27,6 +27,6 @@ class SearchEngine:
     @staticmethod
     def query(url):
         json_response = urlopen(url)
-        json_str = json_response.readall().decode(UTF8_ENCODING);
+        json_str = json_response.read().decode(UTF8_ENCODING);
         response = json.loads(json_str)
         return response[SearchEngine.RESPONSE_KEY]
