@@ -9,8 +9,8 @@ return_limit = 10000000
 target_field_name = "*"
 query = "*"
 search_engine = SearchEngine(collection_url, target_field_name, return_field_name, return_limit)
-document_list = search_engine.query(query)
+data_list = search_engine.query(query)
 extractor = WordExtractor()
-word_list = extractor.extract_words(document_list)
+word_list = extractor.extract_words(data_list)
 for word in word_list:
 	print(word)

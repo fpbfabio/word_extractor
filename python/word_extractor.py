@@ -1,4 +1,4 @@
-from treading import Thread, Lock
+from threading import Thread, Lock
 
 
 class WordExtractor:
@@ -12,7 +12,7 @@ class WordExtractor:
 		self._lock = Lock()
 
 	def _treat_word(self, word):
-		word = str(word.encode(WordExtractor.ENCODING))[1:].strip("'")
+		word = str(word.encode(WordExtractor.ENCODING)).lstrip("b").strip("'")
 		word = word.replace("\\", "")
 		for character in WordExtractor.SPECIAL_CHARACTERS:
 			word = word.strip(character)
@@ -39,7 +39,7 @@ class WordExtractor:
 		self._word_dict = {}
 		thread_list = []
 		for data in data_list:
-			thread = Thread(target=self._collect_words, args=(data))
+			thread = Thread(target=self._collect_words, args=([data]))
 			if(len(thread_list) >= WordExtractor.MAX_THREADS):
 				oldest_thread = thread_list[0]
 				oldest_thread.join()
