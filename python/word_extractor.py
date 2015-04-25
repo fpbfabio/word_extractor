@@ -8,6 +8,7 @@ class WordExtractor:
 	RETURN_LIMIT = 10000000
 	SPECIAL_CHARACTERS = ["'", "-", ",", ".", "/", "?", ";", ":", "(", ")", "+", "*", "[", "]", "{", "}", "&", "$", "@", "#", "%", "\"", "|", "\\"]
 	ENCODING = "utf-8"
+	MAX_THREADS = 100
 
 	def __init__(self, collection_url, return_field_name):
 		collection_url = collection_url
@@ -50,6 +51,10 @@ class WordExtractor:
 		for document in response[SearchEngine.DOCUMENTS_KEY]:
 			data = document[self.return_field_name]
 			thread = Thread(target=self._collect_words, args=(data))
+			if(len(thread_list) >= WordExtractor.MAX_THREADS):
+				oldest_thread = thread_list[0]
+				oldest_thread.join()
+				del(thread_list[0])
 			thread_list.append(thread)
 			thread.start()
 		for thread in thread_list:
