@@ -1,5 +1,5 @@
 from search_engine import SearchEngine
-
+from treading import Thread, Lock
 
 class WordExtractor:
 
@@ -16,6 +16,8 @@ class WordExtractor:
 		return_limit = WordExtractor.RETURN_LIMIT
 		query = WordExtractor.QUERY
 		self.url = SearchEngine.build_query_url(collection_url, target_field_name, self.return_field_name, return_limit, query)
+		self._word_dict = {}
+		self._lock = Lock()
 
 	def _treat_word(self, word)
 		word = str(word.encode(WordExtractor.ENCODING))[1:].strip("'")
@@ -29,16 +31,28 @@ class WordExtractor:
 		word = word.lower()
 		return word
 
+	def _add_word_to_dictionary(self, word):
+		with self._lock:
+			number_of_ocurrences = self._word_dict.get(word, 0) + 1
+			self._word_dict[word] = number_of_ocurrences
+
+	def _collect_words(self, data):
+		word_list = data.split()
+		for word in word_list:
+			word = self._treat_word(word)
+			if(word is not None):
+				self._add_word_to_dictionary
+
 	def extract_words(self):
 		response = SearchEngine.query(self.url)
-		word_dict = {}
+		self._word_dict = {}
+		thread_list = []
 		for document in response[SearchEngine.DOCUMENTS_KEY]:
 			data = document[self.return_field_name]
-			word_list = data.split()
-			for word in word_list:
-				word = self._treat_word(word)
-				if(word is not None):
-					number_of_ocurrences = word_dict.get(word, 0) + 1
-					word_dict[word] = number_of_ocurrences
-		treated_word_list = word_dict.keys()
+			thread = Thread(target=self._collect_words, args=(data))
+			thread_list.append(thread)
+			thread.start()
+		for thread in thread_list:
+			thread.join()
+		treated_word_list = self._word_dict.keys()
 		return treated_word_list
