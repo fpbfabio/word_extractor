@@ -3,7 +3,9 @@ from threading import Thread, Lock
 
 class WordExtractor:
 
-	SPECIAL_CHARACTERS = ["'", "-", ",", ".", "/", "?", ";", ":", "(", ")", "+", "*", "[", "]", "{", "}", "&", "$", "@", "#", "%", "\"", "|", "\\"]
+	INVALID_CHARACTERS = ["'", ",", ".", "/", "?", ";", ":", "(", ")", "+", "*", "[", "]", "{", "}", "&", "$", "@", "#", "%", "\"", "|", "\\", ">", "<", "!", "=", "(", ")", "`"]
+	NUMBERS = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "0"]
+	HIFEN = "-"
 	ENCODING = "utf-8"
 	MAX_THREADS = 100
 
@@ -14,11 +16,15 @@ class WordExtractor:
 	def _treat_word(self, word):
 		word = str(word.encode(WordExtractor.ENCODING)).lstrip("b").strip("'")
 		word = word.replace("\\", "")
-		for character in WordExtractor.SPECIAL_CHARACTERS:
-			word = word.strip(character)
+		for character in WordExtractor.INVALID_CHARACTERS:
+			word = word.strip(character).strip(character)
 			if(character in word):
 				return None
-		if(len(word) <= 1):
+		for character in WordExtractor.NUMBERS:
+			if(character in word):
+				return None
+		word = word.strip(WordExtractor.HIFEN).strip(WordExtractor.HIFEN)
+		if(len(word) <= 3):
 			return None
 		word = word.lower()
 		return word
